@@ -1629,7 +1629,7 @@ document.querySelectorAll('.credits-wrap').forEach(wrap => {
 </script>
 <style>
 /* Selected-work index: all pieces visible at once, so nobody thinks there is only one */
-.reel-index { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; width: calc(100% - 4rem); max-width: 680px; margin: 2rem auto 0; padding: 0; list-style: none; }
+.reel-index { --n: 4; display: grid; grid-template-columns: repeat(min(var(--n), 6), minmax(0, 1fr)); gap: 1rem; width: calc(100% - 4rem); max-width: calc(min(var(--n), 6) * 170px); margin: 2rem auto 0; padding: 0; list-style: none; }
 .reel-index li { min-width: 0; }
 .reel-index button { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; opacity: 0.5; transition: opacity 0.25s; }
 .reel-index button:hover, .reel-index button:focus-visible { opacity: 0.85; }
@@ -1649,7 +1649,7 @@ document.querySelectorAll('.credits-wrap').forEach(wrap => {
   #work .film-caption { margin-top: 1.25rem; }
 }
 @media (max-width: 700px) {
-  .reel-index { width: calc(100% - 2rem); gap: 0.5rem; margin-top: 2rem; }
+  .reel-index { width: calc(100% - 2rem); gap: 0.5rem; margin-top: 2rem; max-width: none; grid-template-columns: repeat(var(--cols-m, 4), minmax(0, 1fr)); }
   .reel-index .ri-title { display: none; }
   .reel-index .ri-text { justify-content: center; margin-top: 0.4rem; }
   #work .reel-arrow { display: none; }
@@ -1677,6 +1677,8 @@ document.querySelectorAll('#work').forEach(section => {
     li.appendChild(b); list.appendChild(li);
     return b;
   });
+  list.style.setProperty('--n', slides.length);
+  list.style.setProperty('--cols-m', slides.length <= 4 ? slides.length : Math.ceil(slides.length / 2));
   track.after(list);
   const mark = () => {
     const cur = Math.round(track.scrollLeft / track.clientWidth);
