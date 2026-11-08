@@ -1629,9 +1629,12 @@ document.querySelectorAll('.credits-wrap').forEach(wrap => {
 })();
 </script>
 <style>
-/* Selected-work index: all pieces visible at once, so nobody thinks there is only one */
-.reel-index { --n: 4; display: grid; grid-template-columns: repeat(min(var(--n), 6), minmax(0, 1fr)); gap: 1rem; width: calc(100% - 4rem); max-width: calc(min(var(--n), 6) * 170px); margin: 2rem auto 0; padding: 0; list-style: none; }
-.reel-index li { min-width: 0; }
+/* Selected-work index: a row of thumbnails so nobody thinks there is only one piece.
+   One row only; if there are more than fit, the row scrolls and small arrows appear. */
+.reel-index-wrap { position: relative; width: calc(100% - 4rem); max-width: 1060px; margin: 2rem auto 0; display: flex; justify-content: center; }
+.reel-index { min-width: 0; display: flex; gap: 1rem; margin: 0; padding: 0; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.reel-index::-webkit-scrollbar { display: none; }
+.reel-index li { flex: 0 0 160px; scroll-snap-align: start; min-width: 0; }
 .reel-index button { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; opacity: 0.5; transition: opacity 0.25s; }
 .reel-index button:hover, .reel-index button:focus-visible { opacity: 0.85; }
 .reel-index button[aria-current="true"] { opacity: 1; }
@@ -1641,18 +1644,30 @@ document.querySelectorAll('.credits-wrap').forEach(wrap => {
 .reel-index .ri-num { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; color: var(--gold-dim); }
 .reel-index button[aria-current="true"] .ri-num { color: var(--gold); }
 .reel-index .ri-title { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.05rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ri-arrow { all: unset; box-sizing: border-box; cursor: pointer; position: absolute; top: 0; width: 2.25rem; aspect-ratio: 9 / 16; max-height: 90px; display: none; align-items: center; justify-content: center; color: var(--text-dim); transition: color 0.2s, opacity 0.2s; }
+.ri-arrow svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.2; }
+.ri-arrow:hover, .ri-arrow:focus-visible { color: var(--gold); }
+.ri-arrow.prev { left: -2.5rem; }
+.ri-arrow.next { right: -2.5rem; }
+.reel-index-wrap.overflow .ri-arrow { display: flex; }
+.ri-arrow[disabled] { opacity: 0; pointer-events: none; }
 /* Desktop: shrink the player just enough that video, caption and index fit one screen */
 @media (min-width: 701px) {
   #work .video-wrap, #work .film-caption { max-width: min(82vw, 1120px, max(720px, calc((100svh - 25rem) * 16 / 9))); }
-  #work .film-title { font-size: clamp(1.4rem, 2vw, 2rem); }
-  #work .film-caption { grid-template-columns: 1fr; gap: 0.6rem; }
   #work.reel-section { padding-bottom: 2rem; }
   #work .film-caption { margin-top: 1.25rem; }
+  #work .film-title { font-size: clamp(1.4rem, 2vw, 2rem); }
+  #work .film-caption { grid-template-columns: 1fr; gap: 0.6rem; }
 }
 @media (max-width: 700px) {
-  .reel-index { width: calc(100% - 2rem); gap: 0.5rem; margin-top: 2rem; max-width: none; grid-template-columns: repeat(var(--cols-m, 4), minmax(0, 1fr)); }
+  .reel-index-wrap { width: calc(100% - 5rem); margin-top: 2rem; }
+  .reel-index { gap: 0.5rem; flex: 1 1 auto; width: 100%; }
+  .reel-index li { flex-basis: calc((100% - 1.5rem) / 4); }
   .reel-index .ri-title { display: none; }
   .reel-index .ri-text { justify-content: center; margin-top: 0.4rem; }
+  .ri-arrow { width: 2rem; height: auto; aspect-ratio: auto; top: 0; bottom: 1.4rem; max-height: none; }
+  .ri-arrow.prev { left: -2.25rem; }
+  .ri-arrow.next { right: -2.25rem; }
   #work .reel-arrow { display: none; }
 }
 </style>
@@ -1661,9 +1676,19 @@ document.querySelectorAll('#work').forEach(section => {
   const track = section.querySelector('.reel');
   const slides = [...track.querySelectorAll('.slide')];
   if (slides.length < 2) return;
+  const es = document.documentElement.lang === 'es';
+  const chev = d => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>';
+  const wrap = document.createElement('div');
+  wrap.className = 'reel-index-wrap';
   const list = document.createElement('ol');
   list.className = 'reel-index';
-  list.setAttribute('aria-label', document.documentElement.lang === 'es' ? 'Todas las piezas' : 'All pieces');
+  list.setAttribute('aria-label', es ? 'Todas las piezas' : 'All pieces');
+  const prev = document.createElement('button');
+  prev.type = 'button'; prev.className = 'ri-arrow prev'; prev.innerHTML = chev('M15 5l-7 7 7 7');
+  prev.setAttribute('aria-label', es ? 'Más piezas (anteriores)' : 'More pieces (previous)');
+  const next = document.createElement('button');
+  next.type = 'button'; next.className = 'ri-arrow next'; next.innerHTML = chev('M9 5l7 7-7 7');
+  next.setAttribute('aria-label', es ? 'Más piezas (siguientes)' : 'More pieces (next)');
   const btns = slides.map((s, i) => {
     const full = s.querySelector('.film-title')?.textContent.trim() || '';
     const bg = s.querySelector('.video-wrap')?.dataset.bg;
@@ -1678,16 +1703,33 @@ document.querySelectorAll('#work').forEach(section => {
     li.appendChild(b); list.appendChild(li);
     return b;
   });
-  list.style.setProperty('--n', slides.length);
-  list.style.setProperty('--cols-m', slides.length <= 4 ? slides.length : Math.ceil(slides.length / 2));
-  track.after(list);
+  wrap.append(prev, list, next);
+  track.after(wrap);
+  const step = () => list.clientWidth * 0.8;
+  prev.addEventListener('click', () => list.scrollBy({ left: -step(), behavior: 'smooth' }));
+  next.addEventListener('click', () => list.scrollBy({ left: step(), behavior: 'smooth' }));
+  const arrows = () => {
+    const over = list.scrollWidth > list.clientWidth + 2;
+    wrap.classList.toggle('overflow', over);
+    prev.disabled = list.scrollLeft <= 2;
+    next.disabled = list.scrollLeft + list.clientWidth >= list.scrollWidth - 2;
+  };
+  let last = -1;
   const mark = () => {
     const cur = Math.round(track.scrollLeft / track.clientWidth);
     btns.forEach((b, i) => b.setAttribute('aria-current', i === cur ? 'true' : 'false'));
+    if (cur !== last) {
+      last = cur;
+      const li = btns[cur]?.parentElement;
+      if (li && (li.offsetLeft < list.scrollLeft || li.offsetLeft + li.offsetWidth > list.scrollLeft + list.clientWidth)) {
+        list.scrollTo({ left: li.offsetLeft - (list.clientWidth - li.offsetWidth) / 2, behavior: 'smooth' });
+      }
+    }
   };
   track.addEventListener('scroll', mark, { passive: true });
-  window.addEventListener('resize', mark);
-  mark();
+  list.addEventListener('scroll', arrows, { passive: true });
+  window.addEventListener('resize', () => { arrows(); mark(); });
+  mark(); arrows();
 });
 </script>
 
