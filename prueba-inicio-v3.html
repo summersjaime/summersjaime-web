@@ -1746,8 +1746,10 @@ document.querySelectorAll('#work').forEach(section => {
 #work .reel-label, #work .reel-count { display: none; }
 #work .slide { position: relative; }
 @media (min-width: 701px) {
+  .intro-title { font-size: clamp(2.7rem, 4.1vw, 4.4rem); }
+  .intro-sub { font-size: clamp(1.35rem, 1.9vw, 1.85rem); }
   .nav-name { font-size: clamp(1.4rem, 1.8vw, 1.7rem); }
-  #work { --vw: max(720px, min(calc(100vw - 5rem), calc((100svh - 22rem) * 16 / 9))); }
+  #work { --vw: max(720px, min(calc(100vw - 5rem), calc((100svh - 24.5rem) * 16 / 9))); }
   #work .video-wrap { max-width: none; width: var(--vw); }
   #work .video-wrap::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 42%; background: linear-gradient(to top, rgba(13,11,8,0.88), rgba(13,11,8,0)); pointer-events: none; }
   #work .video-wrap:has(iframe)::after { display: none; }
