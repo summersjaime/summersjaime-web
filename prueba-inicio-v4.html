@@ -1744,6 +1744,11 @@ document.querySelectorAll('#work').forEach(section => {
   #work .video-wrap, #work .film-caption { max-width: none !important; width: min(calc(100vw - 5rem), calc((100svh - 5rem) * 16 / 9)); }
   #work .slide { padding: 0 2.5rem; }
   #work .reel-arrow { top: calc((100vw - 5rem) * 9 / 32); }
+  #work .reel-index-wrap { max-width: min(calc(100vw - 5rem), 1100px); margin-top: 2.25rem; }
+  #work .reel-index { gap: 1.25rem; }
+  #work .reel-index li { flex-basis: 240px; }
+  #work .reel-index .ri-title { font-size: 1.25rem; }
+  #work .reel-index .ri-num { font-size: 0.7rem; }
 }
 @media (max-width: 700px) {
   .hero { padding: calc(env(safe-area-inset-top, 0px) + 6rem) 1rem 1.75rem; }
