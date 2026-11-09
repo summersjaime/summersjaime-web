@@ -1767,6 +1767,65 @@ document.querySelectorAll('#work').forEach(section => {
   #work .film-caption { box-sizing: border-box; width: 100%; max-width: 100%; padding: 0 1rem; }
 }
 </style>
+<style>
+/* PRUEBA: making of desplegable bajo el vídeo */
+.mo-panel { box-sizing: border-box; width: min(calc(100vw - 5rem), calc((100svh - 5rem) * 16 / 9)); margin: 0 auto; overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.6s ease, opacity 0.4s ease; }
+.mo-panel.open { max-height: 4000px; opacity: 1; }
+.mo-inner { border-bottom: 1px solid var(--edge); padding: 2.75rem 0 3rem; }
+.mo-spoiler { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin: 0 0 2.25rem; }
+.mo-sec { display: grid; grid-template-columns: 13rem 1fr; gap: 2rem; padding: 1.4rem 0; border-top: 1px solid var(--edge); }
+.mo-sec h3 { margin: 0; font-family: 'DM Mono', monospace; font-weight: 400; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); padding-top: 0.45rem; }
+.mo-sec p { margin: 0 0 0.9rem; max-width: 62ch; font-size: 1.15rem; line-height: 1.7; color: var(--text-mid); }
+.mo-sec p:last-child { margin-bottom: 0; }
+.mo-close { all: unset; cursor: pointer; display: inline-block; margin-top: 1.75rem; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+#work .case-link.is-open { color: var(--text); }
+@media (max-width: 700px) {
+  .mo-panel { width: 100%; padding: 0 1rem; }
+  .mo-inner { padding: 2rem 0 2.25rem; }
+  .mo-sec { grid-template-columns: 1fr; gap: 0.6rem; }
+  .mo-sec h3 { padding-top: 0; }
+  .mo-sec p { font-size: 1.08rem; }
+}
+</style>
+<script>
+(function () {
+  const sec = document.getElementById('work'); if (!sec) return;
+  const track = sec.querySelector('.reel');
+  const es = document.documentElement.lang === 'es';
+  const panel = document.createElement('div');
+  panel.className = 'mo-panel'; panel.id = 'making-of'; panel.setAttribute('aria-live', 'polite');
+  track.after(panel);
+  let openHref = null, openLink = null;
+  const label = (a, open) => { a.innerHTML = open ? (es ? 'Cerrar el making of &uarr;' : 'Close the making of &uarr;') : (es ? 'El making of &darr;' : 'The making of &darr;'); a.classList.toggle('is-open', open); a.setAttribute('aria-expanded', open); };
+  const close = () => { panel.classList.remove('open'); if (openLink) label(openLink, false); openHref = openLink = null; };
+  sec.querySelectorAll('.case-link').forEach(a => {
+    label(a, false); a.setAttribute('aria-controls', 'making-of');
+    a.addEventListener('click', async e => {
+      e.preventDefault();
+      const href = a.getAttribute('href');
+      if (openHref === href) { close(); return; }
+      try {
+        const doc = new DOMParser().parseFromString(await (await fetch(href)).text(), 'text/html');
+        const body = doc.querySelector('.case-body'); if (!body) throw 0;
+        let html = '<div class="mo-inner">';
+        const sp = doc.querySelector('.spoiler'); if (sp) html += '<p class="mo-spoiler">' + sp.textContent + '</p>';
+        let cur = null; const secs = [];
+        [...body.children].forEach(n => { if (n.tagName === 'H2') { cur = { h: n.textContent, ps: [] }; secs.push(cur); } else if (cur) cur.ps.push(n.outerHTML); });
+        secs.forEach(s => { html += '<section class="mo-sec"><h3>' + s.h + '</h3><div>' + s.ps.join('') + '</div></section>'; });
+        html += '<button class="mo-close" type="button">' + (es ? 'Cerrar &uarr;' : 'Close &uarr;') + '</button></div>';
+        panel.innerHTML = html;
+        panel.querySelector('.mo-close').addEventListener('click', () => { close(); sec.scrollIntoView({ behavior: 'smooth' }); });
+        if (openLink) label(openLink, false);
+        openHref = href; openLink = a; label(a, true);
+        panel.classList.add('open');
+        setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+      } catch (_) { location.href = href; }
+    });
+  });
+  let last = 0;
+  track.addEventListener('scroll', () => { const i = Math.round(track.scrollLeft / track.clientWidth); if (i !== last) { last = i; close(); } }, { passive: true });
+})();
+</script>
 
 </body>
 </html>
