@@ -1744,6 +1744,13 @@ document.querySelectorAll('#work').forEach(section => {
   #work .video-wrap, #work .film-caption { max-width: none !important; width: min(calc(100vw - 5rem), calc((100svh - 5rem) * 16 / 9)); }
   #work .slide { padding: 0 2.5rem; }
   #work .reel-arrow { top: calc((100vw - 5rem) * 9 / 32); }
+  #work .slide { position: relative; }
+  #work .video-wrap::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 40%; background: linear-gradient(to top, rgba(13,11,8,0.88), rgba(13,11,8,0)); pointer-events: none; }
+  #work .video-wrap:has(iframe)::after { display: none; }
+  #work .film-caption { position: absolute; left: 50%; transform: translateX(-50%); bottom: 2rem; width: calc(min(calc(100vw - 5rem), calc((100svh - 5rem) * 16 / 9)) - 4.5rem) !important; margin: 0; z-index: 5; grid-template-columns: 1fr; gap: 0.7rem; transition: opacity 0.3s; }
+  #work .slide:has(iframe) .film-caption { opacity: 0; pointer-events: none; }
+  #work .film-title { text-shadow: 0 1px 14px rgba(0,0,0,0.7); }
+  #work .film-meta { flex-wrap: wrap; gap: 0.5rem 1.25rem; }
   #work .reel-index-wrap { max-width: min(calc(100vw - 5rem), 1100px); margin-top: 2.25rem; }
   #work .reel-index { gap: 1.25rem; }
   #work .reel-index li { flex-basis: 240px; }
