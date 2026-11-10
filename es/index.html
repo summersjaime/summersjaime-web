@@ -1361,7 +1361,7 @@ document.querySelectorAll('.video-wrap[data-vimeo]').forEach(wrap => {
   btn.innerHTML = '<div class="play-ring"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>';
   btn.addEventListener('click', () => {
     const f = document.createElement('iframe');
-    f.src = 'https://player.vimeo.com/video/' + id + '?autoplay=1&title=0&byline=0&portrait=0&dnt=1&playsinline=1&color=c4a062';
+    f.src = 'https://player.vimeo.com/video/' + id + '?autoplay=1&title=0&byline=0&portrait=0&dnt=1&playsinline=1&quality=1080p&color=c4a062';
     f.title = title;
     f.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write';
     f.allowFullscreen = true;
