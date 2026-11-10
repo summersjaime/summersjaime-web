@@ -1734,6 +1734,16 @@ document.querySelectorAll('#work').forEach(section => {
 }
 </style>
 <style>
+/* 2026-11-10: no rules between sections; the section titles do the separating */
+#work, #credits, #how, #about { border-bottom: none; }
+#credits, #how { padding-top: 6rem; padding-bottom: 0; }
+#about { padding-top: 6rem; }
+@media (max-width: 700px) {
+  #credits, #how, #about { padding-top: 4rem; }
+  #credits, #how { padding-bottom: 0; }
+}
+</style>
+<style>
 /* Making of: unfolds under the video (text read from the case page) */
 .mo-panel { box-sizing: border-box; width: min(calc(100vw - 5rem), calc((100svh - 5rem) * 16 / 9)); margin: 0 auto; overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.6s ease, opacity 0.4s ease; }
 .mo-panel.open { max-height: 4000px; opacity: 1; }
