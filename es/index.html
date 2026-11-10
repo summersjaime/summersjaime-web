@@ -1451,52 +1451,17 @@ const SELECTED_WORK = [
   document.querySelector('[data-selected-link]').hidden = false;
 })();
 
-// ─── Sound: off by default. Placeholder sounds synthesised in the browser;
-// to use Jim's own files later, set AMBIENT_URL / CLICK_URL to audio files.
-const AMBIENT_URL = '';
+// ─── Sound: off by default. Only a soft click on the arrows (no ambient loop).
+// To use Jim's own click later, set CLICK_URL to an audio file.
 const CLICK_URL = '';
 const sound = (() => {
   const btn = document.getElementById('sound-toggle');
   const label = btn.querySelector('.sound-label');
-  let ctx = null, master = null, ambient = null, on = false, paused = false;
+  let ctx = null, master = null, on = false, paused = false;
   const ensure = () => {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-  };
-  const startAmbient = () => {
-    if (ambient) return;
-    if (AMBIENT_URL) {
-      const a = new Audio(AMBIENT_URL); a.loop = true;
-      const src = ctx.createMediaElementSource(a); src.connect(master); a.play().catch(() => {});
-      ambient = { stop: () => a.pause() };
-      return;
-    }
-    // Film projector: shutter/sprocket clatter at 24 fps over a soft motor whirr.
-    // The buffer holds exactly 2 s (48 frames), so the loop is seamless.
-    const sr = ctx.sampleRate, len = sr * 2, buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0);
-    const burst = (at, amp, ms) => {
-      const n = Math.floor(sr * ms / 1000);
-      for (let i = 0; i < n && at + i < len; i++) d[at + i] += (Math.random() * 2 - 1) * amp * Math.exp(-i / (n / 5));
-    };
-    for (let f = 0; f < 48; f++) {
-      const t = Math.floor((f / 24) * sr + (Math.random() - 0.5) * sr * 0.0012);
-      const accent = f % 2 ? 0.7 : 1;                 // two-blade shutter feel
-      burst(t, 0.55 * accent * (0.85 + Math.random() * 0.3), 7);
-      burst(t + Math.floor(sr * 0.009), 0.22 * accent, 4); // sprocket echo
-    }
-    let w = 0;
-    for (let i = 0; i < len; i++) { w = 0.995 * w + 0.005 * (Math.random() * 2 - 1); d[i] += w * 1.2; }
-    const loop = ctx.createBufferSource(); loop.buffer = buf; loop.loop = true;
-    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 0.7;
-    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
-    const g = ctx.createGain(); g.gain.value = 0.22;
-    const motor = ctx.createOscillator(); motor.type = 'triangle'; motor.frequency.value = 96;
-    const mg = ctx.createGain(); mg.gain.value = 0.012;
-    loop.connect(bp).connect(lp).connect(g).connect(master);
-    motor.connect(mg).connect(master);
-    loop.start(); motor.start();
-    ambient = { stop: () => { loop.stop(); motor.stop(); } };
   };
   const fade = (to, t = 0.8) => {
     const now = ctx.currentTime;
@@ -1509,11 +1474,11 @@ const sound = (() => {
     btn.setAttribute('aria-pressed', String(on));
     btn.setAttribute('aria-label', on ? 'Sonido activado. Apagar sonido' : 'Sonido apagado. Activar sonido');
     label.textContent = on ? 'Sonido on' : 'Sonido off';
-    if (on) { ensure(); ctx.resume(); startAmbient(); if (!paused) fade(0.6); }
+    if (on) { ensure(); ctx.resume(); if (!paused) fade(0.6, 0.05); }
     else if (ctx) fade(0, 0.4);
   };
   btn.addEventListener('click', () => set(!on));
-  // Tiny tape/projector click for arrows
+  // Tiny tape click for arrows
   const click = () => {
     if (!on || paused || !ctx) return;
     if (CLICK_URL) { const a = new Audio(CLICK_URL); a.volume = 0.5; a.play().catch(() => {}); return; }
