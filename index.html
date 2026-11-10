@@ -1741,6 +1741,13 @@ document.querySelectorAll('#work').forEach(section => {
   #credits, #how, #about { padding-top: 4rem; }
   #credits, #how { padding-bottom: 0; }
 }
+/* 2026-11-10: section titles up, credit lines down */
+.section-head .s-label { font-size: 0.875rem; color: var(--text-mid); }
+.credits-note { font-size: 1.1rem; color: var(--text-mid); }
+@media (max-width: 700px) {
+  .section-head .s-label { font-size: 0.8rem; letter-spacing: 0.18em; }
+  .credits-note { font-size: 1rem; }
+}
 </style>
 <style>
 /* Making of: unfolds under the video (text read from the case page) */
